@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read access to all cafes
+    match /cafes/{cafeId} {
+      allow read: if true;
+      // Only allow write if authenticated
+      allow write: if request.auth != null;
+    }
+  }
+}
