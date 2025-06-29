@@ -1,6 +1,7 @@
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, updateDoc, doc, query, where } from 'firebase/firestore';
 import { Cafe } from '../models/Cafe';
+import { sampleCafes } from '../data/sampleCafes';
 
 export class CafeService {
   constructor() {
@@ -17,16 +18,58 @@ export class CafeService {
     }
   }
 
-  async getCafes() {
+  async getCafes(searchQuery = '', filters = []) {
     try {
-      console.log('Fetching cafes from Firestore...');
-      const querySnapshot = await getDocs(this.cafesCollection);
-      console.log('Query snapshot:', querySnapshot);
+      console.log('Checking if cafes exist in database...');
+      const initialQuerySnapshot = await getDocs(this.cafesCollection);
+      
+      if (initialQuerySnapshot.empty) {
+        console.log('No cafes found in database, adding sample cafes...');
+        console.log('Sample cafes data:', sampleCafes);
+        
+        for (const cafe of sampleCafes) {
+          const cafeData = {
+            ...cafe,
+            rating: parseFloat(cafe.rating),
+            upvotes: parseInt(cafe.upvotes),
+            downvotes: parseInt(cafe.downvotes),
+            createdAt: cafe.createdAt,
+            updatedAt: cafe.updatedAt
+          };
+          console.log('Adding cafe:', cafeData.name);
+          const docRef = await addDoc(this.cafesCollection, cafeData);
+          console.log(`Successfully added cafe ${cafeData.name} with ID: ${docRef.id}`);
+        }
+        console.log('All sample cafes added successfully!');
+      } else {
+        console.log('Cafes already exist in database');
+      }
+
+      // Build query based on search and filters
+      let q = query(this.cafesCollection);
+      
+      if (searchQuery) {
+        q = query(q, where('address', '>=', searchQuery), where('address', '<=', searchQuery + '\uf8ff'));
+      }
+
+      if (filters.includes('popular')) {
+        q = query(q, where('rating', '>=', 4.5));
+      }
+
+      if (filters.includes('wifi')) {
+        q = query(q, where('wifiQuality', '==', 'excellent'));
+      }
+
+      if (filters.includes('outlets')) {
+        q = query(q, where('powerOutlets', '==', 'plentiful'));
+      }
+
+      const querySnapshot = await getDocs(q);
       const cafes = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      console.log('Fetched cafes:', cafes);
+
       return cafes;
     } catch (error) {
       console.error('Error getting cafes:', error);

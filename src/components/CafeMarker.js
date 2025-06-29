@@ -1,5 +1,5 @@
 import React from 'react';
-import { Marker, InfoWindow } from '@react-google-maps/api';
+import { Marker } from '@react-google-maps/api';
 import { cafeService } from '../services/CafeService';
 
 const CafeMarker = ({ cafe, selectedCafe, onSelect }) => {
@@ -18,54 +18,29 @@ const CafeMarker = ({ cafe, selectedCafe, onSelect }) => {
     }
   };
 
+  if (!cafe?.latitude || !cafe?.longitude) return null;
+
+  const markerColor = () => {
+    const rating = cafe.rating || 0;
+    if (rating >= 70) return 'green';
+    if (rating >= 40) return 'yellow';
+    return 'red';
+  };
+
   return (
-    <>
-      {cafe?.latitude && cafe?.longitude && (
-        <Marker
-          position={{ lat: cafe.latitude, lng: cafe.longitude }}
-          onClick={() => {
-            onSelect(cafe);
-            setIsOpen(true);
-          }}
-          icon={{
-            url: `https://maps.google.com/mapfiles/ms/icons/${
-              (cafe.rating || 0) >= 70 ? 'green' : (cafe.rating || 0) >= 40 ? 'yellow' : 'red'
-            }-dot.png`
-          }}
-        />
-      )}
-      {isOpen && selectedCafe?.id === cafe.id && (
-        <InfoWindow
-          position={{ lat: cafe.latitude, lng: cafe.longitude }}
-          onCloseClick={() => setIsOpen(false)}
-        >
-          <div style={{ padding: '10px' }}>
-            <h3>{cafe.name}</h3>
-            <p>Rating: {cafe.rating}%</p>
-            <p>WiFi: {cafe.wifiQuality}</p>
-            <p>Power Outlets: {cafe.powerOutlets}</p>
-            <p>Noise Level: {cafe.noiseLevel}</p>
-            <p>Food Quality: {cafe.foodQuality}</p>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <button onClick={() => handleVote('upvote')} style={{
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                padding: '5px 10px',
-                cursor: 'pointer'
-              }}>👍</button>
-              <button onClick={() => handleVote('downvote')} style={{
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                padding: '5px 10px',
-                cursor: 'pointer'
-              }}>👎</button>
-            </div>
-          </div>
-        </InfoWindow>
-      )}
-    </>
+    <Marker
+      position={{ lat: cafe.latitude, lng: cafe.longitude }}
+      onClick={() => {
+        onSelect(cafe);
+        setIsOpen(true);
+      }}
+      icon={{
+        url: `https://maps.google.com/mapfiles/ms/icons/${markerColor()}-dot.png`,
+        scaledSize: new window.google.maps.Size(30, 30),
+        origin: new window.google.maps.Point(0, 0),
+        anchor: new window.google.maps.Point(15, 30)
+      }}
+    />
   );
 };
 

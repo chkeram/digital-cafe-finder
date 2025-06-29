@@ -39,40 +39,6 @@ try {
   const testRef = collection(db, 'test');
   console.log('Firestore collection reference created');
 
-  // Sample cafes data
-  const sampleCafes = [
-    {
-      name: "Café de Flore",
-      address: "172 Boulevard Saint-Germain, 75006 Paris, France",
-      latitude: 48.8575,
-      longitude: 2.3355,
-      wifiQuality: "excellent",
-      powerOutlets: "plentiful",
-      noiseLevel: "moderate",
-      foodQuality: "excellent",
-      rating: 0,
-      upvotes: 0,
-      downvotes: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      name: "Café de la Paix",
-      address: "10 Place de l'Opéra, 75009 Paris, France",
-      latitude: 48.8700,
-      longitude: 2.3350,
-      wifiQuality: "excellent",
-      powerOutlets: "plentiful",
-      noiseLevel: "moderate",
-      foodQuality: "very good",
-      rating: 0,
-      upvotes: 0,
-      downvotes: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
-  ];
-
   // Add validation function
   const validateCafeData = (cafe) => {
     const requiredFields = ['name', 'address', 'latitude', 'longitude'];
@@ -88,22 +54,12 @@ try {
     }
   };
 
-  // Validate all cafes
-  sampleCafes.forEach(cafe => validateCafeData(cafe));
-
   async function setupFirebase() {
     try {
       console.log('Initializing Firebase setup...');
       const cafesCollection = collection(db, 'cafes');
       
-      // Add sample cafes
-      for (const cafeData of sampleCafes) {
-        console.log(`Adding cafe: ${cafeData.name}`);
-        const docRef = await addDoc(cafesCollection, cafeData);
-        console.log(`Successfully added cafe ${cafeData.name} with ID: ${docRef.id}`);
-      }
-      
-      console.log('Sample cafes added successfully!');
+      console.log('Firebase setup complete!');
     } catch (error) {
       console.error('Error setting up Firebase:', error);
       console.error('Detailed error:', {
